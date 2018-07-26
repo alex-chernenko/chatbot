@@ -1,0 +1,100 @@
+button {
+    border: 2px solid black;
+}
+
+
+#authorization{
+    width: 500px;
+    background-color: azure;
+    position: absolute;
+    margin-left: 50%;
+    margin-left: 250px;
+    margin-top: 15%;
+    border: 2px solid black;
+    display: flex;
+    
+
+
+}
+#authorization>h3{
+    padding-left:10px;
+}
+.form{
+    padding-left:20px;
+    padding-top:5px;
+    text-align: center;
+}
+.chat{
+    background-color: rgb(172, 255, 226);
+    visibility: hidden;
+    position: absolute;
+    width:700px;
+    height: 600px;
+    border: 2px solid rgb(129, 129, 129);
+    margin-left: 50%;
+    margin-left: 300px;
+    
+
+}
+#chat-u{
+    background-color: white;
+    display:flex;
+    flex-direction: row;
+    
+}
+#chat-box{
+    border-right: 1px solid rgb(204, 204, 204);
+    background-color: white;
+    height: 400px;
+    width: 440px;
+    
+    overflow: scroll;
+}
+#users{
+    
+    height: 400px;
+    width: 200px;
+    overflow: scroll;
+}
+#header {
+    text-align: center;
+    font-size: 30px;
+}
+ul {
+    list-style-type:none;
+    
+}
+ul>li {
+    
+    display: flex;
+    flex-direction:column;
+}
+
+li>li {
+    display: flex;
+    justify-content: space-around;
+    flex-direction:row;
+}
+
+
+
+
+a {
+    text-decoration: line-through;
+}
+
+#sender {
+     margin-top: 25px;
+    font-size: 20px;
+}
+#text {
+    margin-left: 80px;
+}
+#user-box>ul>li{
+    padding-left: 10px;
+   border: 2px solid grey;
+}
+.typing{
+    padding-left:50px;
+    color:"#adadad";
+}
