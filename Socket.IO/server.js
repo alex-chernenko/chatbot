@@ -100,15 +100,15 @@ io.on('connection', function(socket){
             }
           });
         
+          io.emit('chat message', msg);
          if (proxy.text.indexOf("@bot") == 0)
          { const typecheck = new AnswerType().check(proxy.text);
-            const botMessage = new BotAnswer().answer(typecheck, proxy.text)
-            // messages.push(botMessage.apply(proxy.text));
-            
-            messages.push(botMessage.apply(proxy.text));
-                }
-        
-        io.emit('chat message', msg);
+            const botAnwer = new BotAnswer().answer(typecheck, proxy.text);
+            const botMessage = botAnwer.apply(proxy.text);
+            messages.push(botMessage);
+            io.emit('chat message', botMessage);
+         }
+         //Proxy
     });
    
 
@@ -176,11 +176,11 @@ class BotAnswer {
      return answerMessage
     }
   }
+  //Factory
   
   class WeatherAnswer {
     constructor (message) {
       this.type = 'Weather'
-      this.question = message; 
     }
     apply (message) {
         for (let i in days)
@@ -195,6 +195,58 @@ class BotAnswer {
   class MoneyExchangeAnswer {
     constructor () {
       this.type = 'MoneyExchange'
+    }
+    apply (message) {
+        for (let k in currency)
+        {for (let i in currency)
+            {
+               if ((message.indexOf(currency[k]) !=-1) && 
+               (message.indexOf(currency[i]) !=-1) && 
+               (k != i) &&
+               ((message.indexOf(currency[k])>(message.indexOf(currency[i])))))
+               {
+                if (currency[i] == "dollar")
+                  {let amount = ((message.match(/\d+( dollar)/))[0].match(/\d+/))[0];
+                    if (currency[k] == "euro")
+                    {let dollarToEuro = 0.86
+                    return {name: "Tom", nickname:"IamTheBotHere", text:"Ok "+amount+" dollars"+" = "+(amount*dollarToEuro)+" euro"}
+                    }
+                    if (currency[k] == "hryvnia")
+                    {
+                        let dollarToHryvnia = 26.78
+                    return {name: "Tom", nickname:"IamTheBotHere", text:"Ok "+amount+" dollars"+" = "+(amount*dollarToHryvnia)+" hryvnia"}
+                    }
+                  }
+                if (currency[i] == "euro")
+                {let amount = ((message.match(/\d+( euro)/))[0].match(/\d+/))[0];
+                    if (currency[k] == "dollar")
+                    {let euroToDollar = 1.16
+                    return {name: "Tom", nickname:"IamTheBotHere", text:"Ok "+amount+" euros"+" = "+(amount*euroToDollar)+" dollar"}
+                    }
+                    if (currency[k] == "hryvnia")
+                    {
+                        let euroToHryvnia = 31.17
+                    return {name: "Tom", nickname:"IamTheBotHere", text:"Ok "+amount+" euros"+" = "+(amount*euroToHryvnia)+" hryvnia"}
+                    }
+                  }
+                if (currency[i] == "hryvnia")
+                {let amount = ((message.match(/\d+( hryvnia)/))[0].match(/\d+/))[0];
+                    if (currency[k] == "euro")
+                    {let hryvniaToEuro = 0.032
+                    return {name: "Tom", nickname:"IamTheBotHere", text:"Ok "+amount+" hryvnias"+" = "+(amount*hryvniaToEuro)+" euro"}
+                    }
+                    if (currency[k] == "dollar")
+                    {
+                        let hryvniaToDollar = 0.037
+                    return {name: "Tom", nickname:"IamTheBotHere", text:"Ok "+amount+" hryvnias"+" = "+(amount*hryvniaToDollar)+" dollar"}
+                    }
+                  }
+                else {
+                    return {name: "Tom", nickname:"IamTheBotHere", text:"I can`t read your thoughts, please correct your question!"}
+                }
+               }
+            }
+        }
     }
   }
   
