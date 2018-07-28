@@ -25,21 +25,21 @@ app.get('/script.js',function(req,res)
 });
 
 io.on('connection', function(socket){
+
     socket.on('user data', function(nick){
+
         users.push(nick);
         var place = users.length;
-        
         io.emit('user data', users);
-        
         setTimeout(function(){
             nick.status = "online";
             users.splice(place,1);
-         
-            
             io.emit('user data', users);
+
                 }, 60000);
      
     });
+
     socket.on('validation', function (Nick)
     {   var nope = false;
         for (i in nicks)
@@ -61,13 +61,14 @@ io.on('connection', function(socket){
                                      }
         
 
-});
+    });
+
     socket.on('newUser',function (user) {
         socket.username = user.name;
         socket.usernick = user.nickname;
         socket.emit('chat history', messages);
         
-   });
+    });
    socket.on('disconnect', function () {
     var connectionMessage = socket.usernick + " Disconnected from Chat";
      io.emit('disconnected', connectionMessage);
@@ -76,7 +77,7 @@ io.on('connection', function(socket){
          if (users[user].nickname == socket.usernick)
 
          { 
-              var place = users.indexOf(users[user]);
+            var place = users.indexOf(users[user]);
             var updatedUser = users[user];
             updatedUser.status = "just left"
             users.splice(place,1,updatedUser);
@@ -90,41 +91,44 @@ io.on('connection', function(socket){
          }
      }
      
-     
-  });
+    });
+
     socket.on('chat message', function(msg){
+
         messages.push(msg);
+
         const proxy = new Proxy(msg, {
+
             get(target, prop) {
+
               return target[prop];
+
             }
+
           });
         
           io.emit('chat message', msg);
          if (proxy.text.indexOf("@bot") == 0)
-         { const typecheck = new AnswerType().check(proxy.text);
-            const botAnwer = new BotAnswer().answer(typecheck, proxy.text);
-            const botMessage = botAnwer.apply(proxy.text);
+         {  
+            const typecheck = new AnswerType().check(proxy.text);
+            const botAnswer = new BotAnswer().answer(typecheck, proxy.text);
+            const botMessage = botAnswer.apply(proxy.text);
             messages.push(botMessage);
             io.emit('chat message', botMessage);
+
          }
          //Proxy
     });
-   
+        socket.on('disconnect', function () {
 
-    
-   
-    socket.on('disconnect', function () {
-        socket.emit('user disconnected');
-      });
-      socket.on('typing', function (data) {
+            socket.emit('user disconnected');
+
+    });
+        socket.on('typing', function (data) {
        
-        socket.broadcast.emit('typing', data);
-      });
+            socket.broadcast.emit('typing', data);
 
-
-
-
+    });
 });
 
 
@@ -133,13 +137,17 @@ http.listen(3000, function(){
     console.log('listening on 3000');
 });
 
+const notes = [];
 const days = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday","today","tomorrow"]
 const city = ["Lviv", "Kyiv", "Kharkiv", "Odessa", "Dnipro"]
 const currency = ["dollar", "euro", "hryvnia"]
+const advices = ["Listen to some music","Just go for a walk","Wowowo, all will be ok","Just DO IT!!!","Yep, life is strange"]
+const quotes = ["Train yourself to let go of everything you fear to lose. - Yoda", "If you cannot do great things, do small things in a great way. - Napoleon Hill",
+"Honesty is the first chapter in the book of wisdom. - Thomas Jefferson", "The journey of a thousand miles begins with one step. - Lao Tzu", "If opportunity doesn't knock, build a door. - Milton Berle"]
+
 class AnswerType {
     check(message) {
          let type = "notype";
-        console.log(message);
         for (let i in days)
             {for (let k in city)
                 if ((message.indexOf("What the weather") !=-1) && (message.indexOf(city[k]) !=-1) && (message.indexOf(days[i]) !=-1))
@@ -148,7 +156,7 @@ class AnswerType {
             {if ((message.indexOf(currency[k]) != -1) && (message.indexOf("Convert") != -1))
                 { type = 'MoneyExchangeAnswer'}}
                 
-        if (message.indexOf('QuotesAnswer') != -1)
+        if (message.indexOf('show quote') != -1)
              type = 'QuotesAnswer'      
         if (message.indexOf("? #@)₴?$0") != -1)
              type = 'AdviseAnswer'
@@ -157,6 +165,7 @@ class AnswerType {
         return type;
             }
 }
+
 class BotAnswer {
     answer (type, message) {
       
@@ -173,6 +182,10 @@ class BotAnswer {
        else if (type === 'QuotesAnswer') {
         return answerMessage = new QuotesAnswer(message)
       }
+        else if (type === "notype")
+        {
+            return answerMessage = new NoTypeAnswer(message)
+        }
      return answerMessage
     }
   }
@@ -249,20 +262,118 @@ class BotAnswer {
         }
     }
   }
+  //Facade
   
   class NotesAnswer {
     constructor () {
       this.type = 'Notes'
     }
+    apply (message)
+    {
+        if (message.indexOf("note") != -1)
+        {
+            
+            if ((message.match(/(Show note)/)) != null)
+            {
+                if ((message.match(/(Show note list)/)) != null)
+                {   
+                    if (notes == "")
+                    {
+                        return {name: "Tom", nickname:"IamTheBotHere", text:"hmmm, no notes were added"}
+                    }
+                    else
+                    { let allNotes = "Your Notes:"
+                        for (let i=0; i<notes.length; i++)
+                        {
+                          let note = "title: "+notes[i].title+" body: "+ notes[i].body
+                          allNotes = allNotes + note;
+                        }
+                        return {name: "Tom", nickname:"IamTheBotHere", text:allNotes}
+                    }
+                }
+                else
+                {
+                let titleStart = message.indexOf("title:")+7;
+                let noteTitle = message.slice(titleStart);
+                for (let i=0; i<notes.length; i++)
+                        {
+                            if (notes[i].title == noteTitle)
+                            {  
+                                
+                                return {name: "Tom", nickname:"IamTheBotHere", text:"title: "+notes[i].title+", body:"+notes[i].body}
+                               }
+                        
+                        }
+                }
+            }
+            if ((message.match(/(Save note title:)/)) != null)
+            {   
+                let titleStart = message.indexOf("title:")+7;
+                let bodyStart = message.indexOf(", body")+7;
+                let noteTitle = message.slice(titleStart, bodyStart-7);
+                let noteBody = message.slice(bodyStart);
+                const Note = {
+                    title: noteTitle,
+                    body: noteBody
+                }
+                notes.push(Note);
+                return {name: "Tom", nickname:"IamTheBotHere", text:"Your note was saved!"}
+                
+            }
+            if ((message.match(/(Delete note)/)) != null)
+            {
+                let titleStart = message.indexOf("title:")+7;
+                let noteTitle = message.slice(titleStart);
+                for (i=0; i<notes.length; i++)
+                 {
+                     if (notes[i].title == noteTitle)
+                     {  
+                         notes.splice(i,1);
+                         return {name: "Tom", nickname:"IamTheBotHere", text:"Note with title: "+noteTitle+" was deleted"}
+                        }
+                 }
+            }
+        }
+    }
+    
+  }
+
+  class NoTypeAnswer {
+    constructor (message) {
+      this.type = 'NoType'
+    }
+    apply (message)
+    {   
+        return {name: "Tom", nickname:"IamTheBotHere", text:"I can`t read your thoughts, please correct your question!"}
+    }
+    
   }
   class AdviseAnswer {
     constructor () {
       this.type = 'Advise'
     }
+    apply (message) {
+        if (message.indexOf("? #@)₴?$0") != -1)
+        {  
+            let adviceText = advices[getRandomInt(0,4)]
+            return {name: "Tom", nickname:"IamTheBotHere", text: adviceText}
+    }
+  }
+}
+
+function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min)) + min;
   }
   
   class QuotesAnswer {
     constructor () {
       this.type = 'Quotes'
+    }
+    apply(message) {
+        if (message.indexOf('show quote') != -1)
+        {
+            let quoteText = quotes[getRandomInt(0,4)]
+            return {name: "Tom", nickname:"IamTheBotHere", text: quoteText}
+        }
     }
   }
